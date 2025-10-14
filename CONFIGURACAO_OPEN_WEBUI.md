@@ -1,6 +1,6 @@
 # 🤖 CONFIGURAÇÃO OPEN WEBUI DA VPS
 
-## ✅ **INTEGRAÇÃO IMPLEMENTADA COM SUCESSO!**
+# ✅ **INTEGRAÇÃO IMPLEMENTADA COM SUCESSO!**
 
 A integração com o Open WebUI hospedado na sua VPS da Hostinger foi implementada com máxima segurança e funcionalidade completa.
 
