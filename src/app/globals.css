@@ -1,0 +1,469 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+[data-theme="light"] .hist-date { color: #000; }
+[data-theme="light"] .hist-score { color: #2563eb; }
+[data-theme="light"] .hist-score-desc { color: #2563eb; }
+[data-theme="light"] .hist-feedback { color: #000; }
+
+[data-theme="light"] .status-circle { background: #16a34a; }
+[data-theme="dark"] .status-circle { background: #16a34a; }
+[data-theme="light"] .status-circle svg, [data-theme="dark"] .status-circle svg { display: block; }
+[data-theme="light"] .evolution-chart {
+  background: linear-gradient(180deg,#0f172a05,#0f172a08); /* subtle dark overlay like dark theme */
+  border-radius: 12px;
+}
+
+[data-theme="light"] .evolution-chart svg {
+  background: #0f172a00; /* transparent so SVG fills match dark style via CSS */
+}
+
+[data-theme="light"] .evolution-chart .fill-area {
+  fill: rgba(37,99,235,0.06);
+}
+
+[data-theme="light"] .x-label { fill: rgba(11,18,32,0.6); }
+[data-theme="light"] .y-label { fill: #2563eb; }
+
+/* Restore explicit dark-theme styles for components that were accidentally affected
+   Ensure dark theme keeps its original appearance (cards, panels, inputs, charts) */
+[data-theme="dark"] .card,
+[data-theme="dark"] .panel-base,
+[data-theme="dark"] .main-form {
+  @apply backdrop-blur-xl bg-gray-800/20;
+  border: 1px solid rgba(55,65,81,0.5);
+  color: white;
+  box-shadow: none;
+}
+
+[data-theme="dark"] .input-field {
+  @apply text-white bg-gray-800/20;
+  border: 1px solid rgba(55,65,81,0.5);
+}
+
+[data-theme="dark"] .hist-score { color: var(--primary); }
+[data-theme="dark"] .hist-score-desc { color: #cbb7ff; }
+[data-theme="dark"] .hist-date, [data-theme="dark"] .hist-feedback { color: rgba(255,255,255,0.75); }
+
+[data-theme="dark"] .evolution-chart {
+  background: linear-gradient(180deg,#0b0f14,#0f131c);
+  border-radius: 12px;
+}
+[data-theme="dark"] .evolution-chart svg { background: transparent; }
+[data-theme="dark"] .evolution-chart .fill-area { fill: rgba(11,12,20,0.6); }
+[data-theme="dark"] .x-label { fill: rgba(255,255,255,0.7); }
+[data-theme="dark"] .y-label { fill: rgba(255,255,255,0.35); }
+
+:root {
+  --background: #0f131c;
+  --foreground: #ffffff;
+  --primary: #3b82f6;
+  --reditto-blue: #2563eb;
+  --primary-foreground: #ffffff;
+  --secondary: #1f1f1f;
+  --secondary-foreground: #e5e5e5;
+  --accent: #3b82f6;
+  --accent-foreground: #ffffff;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --border: #374151;
+  --input: #1f1f1f;
+  --ring: #3b82f6;
+  --radius: 0.75rem;
+}
+
+/* Additional light-theme surface improvements: remove cold grays and use soft white/blue surfaces
+   Target pages with many cards (Histórico, Evolução) to improve UX and contrast. */
+
+[data-theme="light"] .panel-base,
+[data-theme="light"] .card,
+[data-theme="light"] .main-form {
+  background: linear-gradient(180deg, #ffffff 0%, #f0f9ff 100%); /* white -> very light blue */
+  border: 1px solid rgba(37,99,235,0.06); /* subtle blue-tinged border */
+  color: var(--secondary-foreground);
+}
+
+[data-theme="light"] .card {
+  box-shadow: 0 6px 18px rgba(30,58,138,0.04);
+}
+
+[data-theme="light"] .panel-base .text-gray-400,
+[data-theme="light"] .card .text-gray-400,
+[data-theme="light"] .main-form .text-gray-400 {
+  color: rgba(11,18,32,0.6); /* replace pale gray with clear dark */
+}
+
+[data-theme="light"] .btn-secondary {
+  background: linear-gradient(180deg, #fff 0%, #f0f9ff 100%);
+  color: var(--foreground);
+  border: 1px solid rgba(37,99,235,0.06);
+}
+
+[data-theme="light"] .input-field {
+  background: #fff;
+  color: var(--foreground);
+  border: 1px solid rgba(30,58,138,0.06);
+}
+
+[data-theme="light"] .floating-menu {
+  background: linear-gradient(180deg,#ffffffcc,#f0f9ffcc);
+  color: var(--foreground);
+}
+
+
+/* ---------------------------------------------
+   Light theme visual polishing (overrides)
+   - Remove pale gray tones and favor strong contrast
+   - Use blue accents and near-black text for readability
+   - These rules intentionally override earlier light-theme grays
+---------------------------------------------- */
+
+[data-theme="light"] .btn-secondary {
+  background: var(--secondary);
+  color: var(--secondary-foreground);
+  border: 1px solid rgba(30,58,138,0.06);
+}
+
+[data-theme="light"] .card {
+  background: var(--secondary);
+  border: 1px solid rgba(30,58,138,0.06);
+  box-shadow: 0 2px 8px rgba(34,16,82,0.03);
+}
+
+[data-theme="light"] .input-field {
+  background: var(--input);
+  border: 1px solid rgba(30,58,138,0.06);
+  color: var(--foreground);
+}
+
+[data-theme="light"] .text-white { color: var(--foreground); }
+[data-theme="light"] .text-gray-300 { color: rgba(124,58,237,0.95); }
+[data-theme="light"] .text-gray-400 { color: rgba(11,18,32,0.65); }
+
+[data-theme="light"] .toggle-button-inactive {
+  background: #f0f9ff; /* subtle blue tint */
+  color: rgba(11,18,32,0.8);
+  border: 1px solid rgba(30,58,138,0.05);
+}
+
+[data-theme="light"] .sidebar-button-inactive {
+  background: var(--secondary);
+  color: rgba(11,18,32,0.85);
+  border: 1px solid rgba(30,58,138,0.04);
+}
+
+[data-theme="light"] .header-text { color: var(--foreground); }
+
+
+/* Light theme variables (toggle via data-theme attribute) */
+:root[data-theme="light"] {
+  --background: #e5e7eb;
+  --foreground: #111827;
+  --primary: #2563eb;
+  --primary-foreground: #ffffff;
+  --secondary: #ffffff;
+  --secondary-foreground: #111827;
+  --accent: #3b82f6;
+  --accent-foreground: #ffffff;
+  --destructive: #e11d48;
+  --destructive-foreground: #ffffff;
+  --border: #d1d5db;
+  --input: #ffffff;
+  --ring: #3b82f6;
+  --radius: 0.75rem;
+}
+
+html, body, #__next {
+  height: 100%;
+}
+
+* {
+  border-color: hsl(var(--border));
+}
+
+body {
+  color: hsl(var(--foreground));
+  background: var(--background);
+  min-height: 100vh;
+  font-family: 'Inter', sans-serif;
+  margin: 0;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+@layer base {
+  * { border-color: hsl(var(--border)); }
+  body { @apply bg-background text-foreground; }
+}
+
+@layer components {
+  .main-form {
+    background: linear-gradient(135deg, rgba(255,255,255,0.035) 0%, rgba(255,255,255,0.08) 100%);
+    border: 1px solid rgba(255,255,255,0.10);
+    border-radius: var(--radius);
+    backdrop-filter: saturate(1.1) blur(6px);
+  }
+  .btn-primary {
+    @apply flex gap-2 items-center px-6 py-3 font-medium text-white bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 rounded-2xl border backdrop-blur-sm transition-all duration-200 hover:from-blue-700 hover:via-blue-800 hover:to-blue-900 border-blue-500/20;
+  }
+  .btn-primary, .btn-secondary, .input-field, .card, .panel-base, .floating-menu, .sidebar-button-inactive, .sidebar-button-active {
+    transition: transform 150ms ease, box-shadow 150ms ease, background-color 180ms ease, color 180ms ease;
+  }
+  .btn-secondary {
+    @apply flex gap-2 items-center px-6 py-3 font-medium text-white rounded-2xl border backdrop-blur-sm transition-all duration-200 bg-gray-800/20 hover:bg-gray-700/30 border-gray-700/50;
+  }
+  .panel-base {
+    @apply rounded-2xl border backdrop-blur-sm bg-white/5 border-gray-600/30;
+    background: linear-gradient(135deg, rgba(255,255,255,0.02) 0%, rgba(255,255,255,0.08) 100%);
+  }
+  .card {
+    @apply p-6 rounded-2xl border backdrop-blur-xl bg-gray-800/20 border-gray-700/50;
+  }
+  .input-field {
+    @apply px-4 py-3 placeholder-gray-400 text-white rounded-2xl border backdrop-blur-sm transition-all duration-200 bg-gray-800/20 border-gray-700/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50;
+  }
+  .floating-menu {
+    position: fixed;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(15, 19, 28, 0.9);
+    color: white;
+    padding: 10px 16px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,.08);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 50;
+    backdrop-filter: saturate(1.2) blur(6px);
+    transition: all 0.3s ease;
+  }
+
+  /* Light theme floating menu */
+  [data-theme="light"] .floating-menu {
+    background: rgba(248, 250, 252, 0.9);
+    color: #0f172a;
+    border: 1px solid rgba(0,0,0,.08);
+  }
+
+  /* Light theme adjustments */
+  [data-theme="light"] .btn-secondary {
+    @apply text-gray-700 bg-white border border-gray-200 hover:bg-gray-50;
+  }
+
+  [data-theme="light"] .card {
+    @apply bg-white border border-gray-200 shadow-sm;
+  }
+
+  [data-theme="light"] .input-field {
+    @apply placeholder-gray-500 text-gray-900 bg-white border border-gray-300;
+  }
+
+  /* Text colors for light theme */
+  [data-theme="light"] .text-white {
+    @apply text-gray-900;
+  }
+
+  [data-theme="light"] .text-gray-300 {
+    @apply text-gray-600;
+  }
+
+  [data-theme="light"] .text-gray-400 {
+    @apply text-gray-500;
+  }
+
+  /* Light theme header */
+  [data-theme="light"] .header-item {
+    /* Removed background and border for clean appearance */
+  }
+
+  [data-theme="light"] .header-text {
+    @apply text-gray-700;
+  }
+
+  /* Cor do título Disclaimer (tema claro/escuro) */
+  .text-disclaimer { color: var(--foreground); }
+  [data-theme="light"] .text-disclaimer { color: #1f2937; }
+
+  /* Hamburger color per theme */
+  .hamburger-bars { background-color: #ffffff; }
+  [data-theme="light"] .hamburger-bars { background-color: #1f2937; }
+
+  /* Light theme main form */
+  [data-theme="light"] .main-form {
+    background: linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(248,250,252,0.95) 100%);
+    border: 1px solid rgba(209,213,219,0.5);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  }
+
+  /* Light theme buttons */
+  [data-theme="light"] .toggle-button-active {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 55%, #1d4ed8 100%);
+  }
+
+  [data-theme="light"] .toggle-button-inactive {
+    @apply text-gray-600 bg-gray-100 border border-gray-200;
+  }
+
+  /* Garantir texto branco em botões azuis no tema claro */
+  [data-theme="light"] .btn-primary,
+  [data-theme="light"] .toggle-button-active {
+    color: #ffffff !important;
+  }
+
+  /* Light theme sidebar buttons */
+  [data-theme="light"] .sidebar-button-active {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 55%, #1d4ed8 100%);
+    color: #ffffff !important;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  }
+
+  [data-theme="light"] .sidebar-button-inactive {
+    @apply text-gray-600 bg-gray-100 border border-gray-200 hover:bg-gray-200;
+  }
+
+  /* Light theme: stronger contrast for inactive sidebar buttons */
+  [data-theme="light"] .sidebar-button-inactive {
+    color: #0f172a; /* slate-900 */
+    background: #f1f5f9; /* slate-100 */
+    border-color: #cbd5e1; /* slate-300 */
+  }
+  [data-theme="light"] .sidebar-button-inactive:hover {
+    background: #e2e8f0; /* slate-200 */
+  }
+
+  /* Dark theme sidebar buttons (default) */
+  .sidebar-button-active {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 55%, #1d4ed8 100%);
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  }
+
+  .sidebar-button-inactive {
+    @apply text-gray-300 border bg-gray-800/30 border-gray-600/40 hover:bg-gray-700/40;
+  }
+
+  /* Light theme: sidebar container and drawer contrast improvements */
+  [data-theme="light"] .sidebar-container {
+    background: #ffffff; /* solid white for clarity */
+    border-color: #e5e7eb; /* gray-200 */
+  }
+  [data-theme="light"] .sidebar-drawer {
+    background: rgba(255,255,255,0.98);
+    border-color: #e5e7eb;
+  }
+
+  /* Sidebar toggle button */
+  .sidebar-toggle-button {
+    @apply text-white bg-gray-800/80 hover:bg-gray-700/40;
+  }
+
+  /* Light theme sidebar toggle button - higher contrast */
+  [data-theme="light"] .sidebar-toggle-button {
+    color: #0f172a; /* slate-900 */
+    background: #ffffff; /* solid white for clarity */
+    border: 1px solid #94a3b8; /* slate-400 */
+    box-shadow: 0 1px 0 rgba(0,0,0,0.03), 0 1px 2px rgba(0,0,0,0.06);
+  }
+  [data-theme="light"] .sidebar-toggle-button:hover {
+    background: #e5e7eb; /* gray-200 */
+    border-color: #64748b; /* slate-500 */
+  }
+  [data-theme="light"] .sidebar-toggle-button:focus-visible {
+    outline: 2px solid #2563eb; /* primary */
+    outline-offset: 2px;
+  }
+
+  /* Subtle dot grid background for contrast on main pages */
+  .bg-dot-grid {
+    background-image: radial-gradient(circle, var(--dot-color, rgba(148,163,184,0.12)) 1px, transparent 1.5px);
+    background-size: 24px 24px;
+    background-position: center;
+  }
+
+  /* Theme-aware dot color to keep near-background tone */
+  [data-theme="dark"] .bg-dot-grid { --dot-color: rgba(162, 176, 195, 0.12); }
+  [data-theme="light"] .bg-dot-grid { --dot-color: rgba(3, 3, 3, 0.24); }
+}
+
+/* Forçar contraste correto nas labels do modal de termos */
+[data-theme="light"] .terms-label { color: #111827 !important; }
+[data-theme="dark"] .terms-label { color: #ffffff !important; }
+
+/* ---------------------------------------------
+   Light theme high-contrast tweaks (darker)
+   - Stronger secondary text and labels
+   - Darker inactive sidebar buttons
+---------------------------------------------- */
+[data-theme="light"] .text-gray-400 { color: #1f2937; }
+[data-theme="light"] .text-gray-300 { color: #374151; }
+[data-theme="light"] .header-text { color: #111827; }
+
+/* Chart labels more legible on light */
+[data-theme="light"] .x-label { fill: rgba(15,23,42,0.85); }
+
+/* Sidebar buttons even darker for contrast */
+[data-theme="light"] .sidebar-button-inactive {
+  color: #0b1220;
+  background: #cbd5e1; /* slate-300 */
+  border-color: #94a3b8; /* slate-400 */
+}
+[data-theme="light"] .sidebar-button-inactive:hover { background: #94a3b8; }
+
+/* Chart tooltip: ensure visible text on light mode */
+[data-theme="light"] .chart-tooltip {
+  background: #0b1220; /* near-black */
+  color: #ffffff;
+  border-color: rgba(0,0,0,0.25);
+}
+[data-theme="light"] .chart-tooltip .text-gray-200 { color: #e5e7eb; }
+
+/* Welcome message: increase contrast only on light mode */
+[data-theme="light"] .welcome-message {
+  color: #1d4ed8; /* much darker blue for high contrast */
+  font-weight: 600;
+  text-shadow: 0 1px 0 rgba(255,255,255,0.35), 0 0 1px rgba(0,0,0,0.35);
+}
+
+/* Light theme for Temas page - use same white colors as histórico cards */
+[data-theme="light"] .temas-status-card,
+[data-theme="light"] .temas-theme-card,
+[data-theme="light"] .temas-info-card {
+  background: linear-gradient(180deg, #ffffff 0%, #f0f9ff 100%); /* white -> very light blue */
+  border: 1px solid rgba(37,99,235,0.06); /* subtle blue-tinged border */
+  color: #111827; /* dark text for contrast */
+  box-shadow: 0 6px 18px rgba(30,58,138,0.04);
+}
+
+[data-theme="light"] .temas-status-card .text-gray-300,
+[data-theme="light"] .temas-theme-card .text-gray-300,
+[data-theme="light"] .temas-info-card .text-gray-300 {
+  color: rgba(11,18,32,0.6); /* replace pale gray with clear dark */
+}
+
+[data-theme="light"] .temas-status-card .text-gray-400,
+[data-theme="light"] .temas-theme-card .text-gray-400,
+[data-theme="light"] .temas-info-card .text-gray-400 {
+  color: rgba(11,18,32,0.65);
+}
+
+/* Light theme specific color adjustments for Temas page */
+/* Red circled elements - change to dark gray (more transparent than pure black) */
+[data-theme="light"] .temas-theme-card p,
+[data-theme="light"] .temas-info-card ul li {
+  color: rgba(0,0,0,0.75) !important; /* dark gray with transparency */
+}
+
+/* Blue circled elements - change to lighter blue */
+[data-theme="light"] .temas-theme-card .text-blue-400,
+[data-theme="light"] .temas-theme-card span:last-child {
+  color: #3b82f6 !important; /* lighter blue than the original #2563eb */
+}
+
+/* Light theme - "Atualizado" badge: keep green text, remove background */
+[data-theme="light"] .temas-status-card .bg-green-900\/30 {
+  background: transparent !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+}
