@@ -69,7 +69,8 @@ export default function HistoricoPage() {
       const ok = await (window as any).redittoConfirm?.('Deseja realmente excluir esta dúvida?');
       if (!ok) return;
 
-      const { error } = await supabase.from('doubts').delete().eq('id', id).eq('user_id', user?.id);
+  if (!user?.id) throw new Error('Usuário não autenticado');
+  const { error } = await supabase.from('doubts').delete().eq('id', id).eq('user_id', user.id);
       if (error) throw error;
       setDoubts(prev => prev.filter(d => d.id !== id));
       window.dispatchEvent(new CustomEvent('reditto:toast', { detail: { message: 'Dúvida excluída com sucesso.', type: 'success' } }));
@@ -93,7 +94,7 @@ export default function HistoricoPage() {
             <div className="max-w-5xl px-6 py-8 mx-auto">
               <div className="flex items-center p-6 mb-4">
                 <div className="hidden md:flex items-center gap-2 header-item bg-gray-800/20 border border-gray-700/50 rounded-full px-4 py-2 backdrop-blur-sm">
-                  <Image src="/assets/logo.PNG" alt="Reditto Logo" width={20} height={20} className="w-5 h-5" />
+                  <Image src="/assets/logo.PNG?v=3" alt="Reditto Logo" width={20} height={20} className="w-5 h-5" />
                   <span className="header-text text-white/90 text-sm font-medium">Reditto Study - Sua IA de Estudos!</span>
                 </div>
                 <div className="ml-auto flex items-center gap-3">

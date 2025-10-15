@@ -9,12 +9,10 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "Reditto Study",
   description: "Plataforma de estudo com IA para tirar dúvidas",
-    icons: {
-    icon: [
-      { url: '/assets/logo.PNG?v=2', type: 'image/png' },
-    ],
-    shortcut: ['/assets/logo.PNG?v=2'],
-    apple: ['/assets/logo.PNG?v=2'],
+  icons: {
+    icon: '/assets/logo.PNG?v=3',
+    apple: '/assets/logo.PNG?v=3',
+    shortcut: '/assets/logo.PNG?v=3',
   },
 };
 

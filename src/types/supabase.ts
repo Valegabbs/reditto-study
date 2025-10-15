@@ -76,6 +76,39 @@ export type Database = {
         }
         Relationships: []
       }
+      essays: {
+        Row: {
+          id: string
+          user_id: string
+          topic: string | null
+          essay_text: string
+          final_score: number | null
+          competencies: string | null
+          feedback: string | null
+          created_at: string | null
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          topic?: string | null
+          essay_text: string
+          final_score?: number | null
+          competencies?: string | null
+          feedback?: string | null
+          created_at?: string | null
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          topic?: string | null
+          essay_text?: string
+          final_score?: number | null
+          competencies?: string | null
+          feedback?: string | null
+          created_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

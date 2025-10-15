@@ -122,6 +122,7 @@ const subjects: Subject[] = [
 export default function MateriasPage() {
   const { user, signOut, isConfigured, loading } = useAuth();
   const router = useRouter();
+  const [showPopup, setShowPopup] = useState(false);
   const [showConsent, setShowConsent] = useState(false);
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [hasAcceptedConsent, setHasAcceptedConsent] = useState(false);
@@ -140,6 +141,15 @@ export default function MateriasPage() {
 
   // Carregar/checar consentimento
   useEffect(() => {
+    // Mostrar popup informativo uma vez por sessão quando usuário visita a página de matérias
+    try {
+      const shown = sessionStorage.getItem('reditto-materias-popup-shown') === 'true';
+      if (!shown) {
+        setShowPopup(true);
+        sessionStorage.setItem('reditto-materias-popup-shown', 'true');
+      }
+    } catch {}
+
     const check = async () => {
       if (isSigningOut) { setShowConsent(false); return; }
       // Aguarda carregar estado de auth para evitar abrir modal indevidamente
@@ -236,7 +246,7 @@ export default function MateriasPage() {
             <div className="flex items-center p-6">
               {/* Esconde logo e slogan no mobile (onde existe o menu hambúrguer) */}
               <div className="hidden gap-3 items-center ml-4 md:flex header-item">
-                <Image src="/assets/logo.PNG" alt="Reditto Study Logo" width={36} height={36} className="w-9 h-9" />
+                <Image src="/assets/logo.PNG?v=3" alt="Reditto Study Logo" width={36} height={36} className="w-9 h-9" />
                 <span className="text-base font-medium header-text text-white/90">Reditto Study - Sua IA de Estudos!</span>
               </div>
               <div className="flex gap-3 items-center ml-auto">
@@ -346,6 +356,26 @@ export default function MateriasPage() {
               isOpen={showConsent && !isSigningOut}
               onProceed={handleConsentProceed}
             />
+              {/* Informational popup (white) shown on Materias page */}
+              {showPopup && (
+                <div id="reditto-popup" className="fixed inset-0 z-50 flex items-center justify-center" role="dialog" aria-modal="true">
+                  <div className="absolute inset-0 bg-black/20" onClick={() => setShowPopup(false)} />
+                  <div className="w-full max-w-sm p-6 bg-white rounded-2xl shadow-lg pointer-events-auto z-10">
+                    <div className="flex flex-col items-center gap-4 text-center">
+                      <h3 className="text-lg font-semibold text-gray-900">Aviso!</h3>
+                      <img src="/pop-up.png" alt="Aviso" className="w-24 h-24 object-contain mx-auto" />
+                      <p className="text-sm text-gray-800 leading-relaxed">
+                        A Reditto Study usa inteligência artificial para responder suas dúvidas, mas nem sempre acerta tudo. 🧠💬
+                        <br />
+                        As respostas podem conter erros, então é sempre bom conferir as informações e, se possível, confirmar com um professor ou outra fonte confiável. 😉
+                      </p>
+                      <div className="mt-2">
+                        <button onClick={() => setShowPopup(false)} className="px-4 py-2 rounded-full bg-blue-600 text-white">Fechar</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
           </div>
         </div>
       </div>

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { FileText, CheckCircle, AlertTriangle, Lightbulb, Printer, Brain, Award, TrendingUp, Target, Sun, ArrowLeft } from 'lucide-react';
+import { FileText, CheckCircle, AlertTriangle, Lightbulb, Printer, Brain, Award, TrendingUp, Target, Sun, ArrowLeft, Image as ImageIcon } from 'lucide-react';
 import Image from 'next/image';
 import ClientWrapper from '../components/ClientWrapper';
 import Disclaimer from '../components/Disclaimer';
@@ -15,8 +15,23 @@ export default function ResultadosPage() {
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
-    const dataParam = urlParams.get('data');
+  const dataParam = urlParams.get('data');
+  const n8nTextParam = urlParams.get('n8nText') || urlParams.get('text') || urlParams.get('n8n');
     const essayId = urlParams.get('essayId');
+
+    // Prioridade: sessionStorage (evita passar base64 enormes pela URL)
+    try {
+      const cached = sessionStorage.getItem('reditto:lastDoubtResult');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        setResult(normalizeResult(parsed));
+        // limpar cache após leitura para evitar reuso acidental
+        try { sessionStorage.removeItem('reditto:lastDoubtResult'); } catch {}
+        return;
+      }
+    } catch (err) {
+      // ignore and continue to parse URL params
+    }
 
     const loadFromId = async (id: string) => {
       try {
@@ -42,11 +57,22 @@ export default function ResultadosPage() {
       }
     };
 
-    if (dataParam) {
-      // Dados vindos da API de correção (prioridade)
+    if (n8nTextParam) {
+      // Parâmetro vindo do workflow n8n (texto puro) — tentar decodificar e normalizar
       try {
-        const parsedData = JSON.parse(decodeURIComponent(dataParam));
-        setResult(parsedData);
+        const raw = decodeURIComponent(n8nTextParam);
+        // o n8n pode enviar texto simples ou uma string JSON — tentar detectar
+        let parsed: any = raw;
+        try { parsed = JSON.parse(raw); } catch {}
+        setResult(normalizeResult(parsed));
+      } catch (err) {
+        setResult(normalizeResult(n8nTextParam));
+      }
+    } else if (dataParam) {
+      // Dados vindos da API de correção em JSON (prioridade)
+      try {
+  const parsedData = JSON.parse(decodeURIComponent(dataParam));
+  setResult(normalizeResult(parsedData));
       } catch (error) {
         console.error('Erro ao parsear dados:', error);
         // Fallback: tentar carregar por essayId se fornecido
@@ -58,12 +84,97 @@ export default function ResultadosPage() {
       }
     } else if (essayId) {
       // Carregar diretamente do banco usando o id
-      loadFromId(essayId);
+  loadFromId(essayId);
     } else {
       // Sem parâmetros: mostrar dados de exemplo
       setResult(getExampleData());
     }
   }, []);
+
+  // Normaliza formatos variados vindos do n8n / APIs para um shape consistente
+  function normalizeResult(input: any) {
+    // if string: tentar heurísticas para separar dúvida e resposta
+    if (typeof input === 'string') {
+      const s = input.trim();
+      // tentativa 1: dupla quebra de linha -> primeira parte = dúvida, resto = resposta
+      const dbl = s.split(/\r?\n\r?\n/);
+      if (dbl.length >= 2) {
+        const original = dbl[0].trim();
+        const ai = dbl.slice(1).join('\n\n').trim();
+        return { aiResponse: ai || null, originalDoubt: original || null };
+      }
+
+      // tentativa 2: procurar marcadores "Resposta" e "Dúvida"
+      const respostaMatch = s.match(/(?:resposta(?: da ia)?|answer|response|resultado|output)[:\s-]+([\s\S]+)/i);
+      const doubtMatch = s.match(/(?:dúvida|duvida|pergunta|question|prompt|original question|original doubt)[:\s-]+([\s\S]+?)(?:\r?\n|$)/i);
+      if (respostaMatch && doubtMatch) {
+        return { aiResponse: respostaMatch[1].trim(), originalDoubt: doubtMatch[1].trim() };
+      }
+      if (respostaMatch) {
+        const before = respostaMatch.index ? s.slice(0, respostaMatch.index).trim() : '';
+        return { aiResponse: respostaMatch[1].trim(), originalDoubt: before || null };
+      }
+
+      // tentativa 3: única linha com '?' -> provavelmente é a dúvida
+      if (s.length < 200 && s.endsWith('?')) {
+        return { aiResponse: null, originalDoubt: s };
+      }
+
+      // fallback: tratar tudo como resposta
+      return { aiResponse: s, originalDoubt: null };
+    }
+
+    // if array, try first element
+    if (Array.isArray(input) && input.length > 0) {
+      // n8n costuma enviar [{ json: { output: '...' } }]
+      const first = input[0];
+      if (first && typeof first === 'object') {
+        if (first.json) return normalizeResult(first.json);
+        return normalizeResult(first);
+      }
+    }
+
+    if (typeof input === 'object' && input !== null) {
+      // possible keys for ai response
+      const aiCandidates = ['aiResponse', 'ai_response', 'output', 'text', 'response', 'answer', 'result'];
+      let ai: string | null = null;
+      for (const k of aiCandidates) {
+        if (input[k]) { ai = input[k]; break; }
+      }
+
+      // possible keys for original doubt/question
+      const doubtCandidates = ['originalDoubt', 'original_doubt', 'originalQuestion', 'doubt', 'input', 'question', 'prompt', 'userQuestion', 'doubt_text'];
+      let od: string | null = null;
+      for (const k of doubtCandidates) {
+        if (input[k]) { od = input[k]; break; }
+      }
+
+      // possible keys for images associated with the doubt (base64 or urls)
+      const imageCandidates = ['doubtImages', 'doubt_images', 'imagesBase64', 'images', 'image_urls', 'imageUrls'];
+      let di: string[] | null = null;
+      for (const k of imageCandidates) {
+        if (input[k] && Array.isArray(input[k])) { di = input[k]; break; }
+      }
+
+      // if nested with items/json
+      if (!ai && input.items && Array.isArray(input.items) && input.items[0]) {
+        const maybe = input.items[0];
+        if (maybe.json) return normalizeResult(maybe.json);
+      }
+
+      // coerce to strings and carry images array if present
+      return {
+        aiResponse: ai != null ? String(ai) : null,
+        originalDoubt: od != null ? String(od) : null,
+        doubtImageUrl: input.doubtImageUrl || input.doubt_image_url || input.image_url || null,
+        doubtImages: di || null,
+        // keep original raw for debugging if needed
+        __raw: input
+      };
+    }
+
+    return { aiResponse: null, originalDoubt: null };
+  }
 
   // Salvar automaticamente a redação no histórico do usuário autenticado
   useEffect(() => {
@@ -199,8 +310,8 @@ export default function ResultadosPage() {
       {/* Header (copiado da página de envio) */}
       <div className="flex items-center p-6 max-w-6xl mx-auto">
         {/* Esconde logo e slogan no mobile (onde existe o menu hambúrguer) */}
-          <div className="hidden md:flex items-center gap-2 header-item bg-gray-800/20 border border-gray-700/50 rounded-full px-4 py-2 backdrop-blur-sm">
-            <Image src="/assets/logo.PNG" alt="Reditto Logo" width={20} height={20} className="w-5 h-5" />
+            <div className="hidden md:flex items-center gap-2 header-item bg-gray-800/20 border border-gray-700/50 rounded-full px-4 py-2 backdrop-blur-sm">
+            <Image src="/assets/logo.PNG?v=3" alt="Reditto Logo" width={20} height={20} className="w-5 h-5" />
           <span className="header-text text-white/90 text-sm font-medium">Reditto Study - Sua IA de Estudos!</span>
         </div>
         <div className="ml-auto flex items-center gap-3">
@@ -258,10 +369,30 @@ export default function ResultadosPage() {
             <h2 className="text-white text-xl font-semibold">Sua Dúvida</h2>
           </div>
           <div className="bg-gray-800/20 rounded-2xl p-4 border border-gray-700/50 backdrop-blur-sm">
-            <p className="text-gray-300 leading-relaxed">
-              {result.originalDoubt || result.originalEssay || 'Dúvida não disponível'}
-            </p>
-          </div>
+              <div className="text-gray-300 leading-relaxed space-y-4">
+                {result.originalDoubt ? (
+                  <div className="prose prose-invert max-w-none whitespace-pre-wrap">{String(result.originalDoubt)}</div>
+                ) : result.originalEssay ? (
+                  <div className="prose prose-invert max-w-none whitespace-pre-wrap">{String(result.originalEssay)}</div>
+                ) : (
+                  <div className="text-gray-400">Dúvida não disponível</div>
+                )}
+
+                {/* Se houver imagens associadas à dúvida, renderizar abaixo */}
+                {((result.doubtImages && result.doubtImages.length > 0) || result.doubtImageUrl) && (
+                  <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {(result.doubtImages || (result.doubtImageUrl ? [result.doubtImageUrl] : []))
+                      .filter(Boolean)
+                      .map((src: string, idx: number) => (
+                        <div key={idx} className="rounded-lg overflow-hidden border border-gray-700/40 bg-gray-900/10 p-2">
+                          <img src={src} alt={`Imagem da dúvida ${idx+1}`} className="w-full h-auto object-contain" />
+                        </div>
+                      ))}
+                  </div>
+                )}
+
+              </div>
+            </div>
         </div>
 
         {/* Image Preview if available */}
@@ -288,9 +419,7 @@ export default function ResultadosPage() {
             <h2 className="text-white text-xl font-semibold">Resposta da IA</h2>
           </div>
           <div className="bg-gradient-to-br from-blue-900/20 to-blue-900/20 rounded-2xl p-6 border border-blue-500/30 backdrop-blur-sm">
-            <p className="text-gray-300 leading-relaxed text-lg">
-              {result.aiResponse || result.feedback?.summary || 'Resposta não disponível'}
-            </p>
+            <pre className="text-gray-300 leading-relaxed text-lg whitespace-pre-wrap">{String(result.aiResponse || result.feedback?.summary || 'Resposta não disponível')}</pre>
           </div>
         </div>
 

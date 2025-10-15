@@ -193,7 +193,7 @@ function EnvioPageContent() {
           <div className="flex items-center p-6">
             {/* Esconde logo e slogan no mobile (onde existe o menu hambúrguer) */}
               <div className="hidden gap-3 items-center ml-4 md:flex header-item">
-              <Image src="/assets/logo.PNG" alt="Reditto Logo" width={36} height={36} className="w-9 h-9" />
+              <Image src="/assets/logo.PNG?v=3" alt="Reditto Logo" width={36} height={36} className="w-9 h-9" />
               <span className="text-base font-medium header-text text-white/90">Correção de Redação para Todos!</span>
             </div>
             <div className="flex gap-3 items-center ml-auto">

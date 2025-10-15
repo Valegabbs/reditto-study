@@ -30,14 +30,25 @@ export async function POST(request: NextRequest) {
     };
 
     const formData = await request.formData();
-    const subject = formData.get('subject') as string;
-    const doubtText = formData.get('doubtText') as string;
-    const imageFile = formData.get('image') as File | null;
+    const subject = String(formData.get('subject') || '');
+    const doubtText = String(formData.get('doubtText') || '');
+    // suporte a múltiplas imagens no campo 'images'
+    const images: File[] = [];
+    try {
+      const entries = formData.getAll('images');
+      for (const e of entries) {
+        if (e instanceof File) images.push(e);
+      }
+    } catch (err) {
+      // fallback: tentar campo singular 'image'
+      const maybe = formData.get('image');
+      if (maybe instanceof File) images.push(maybe);
+    }
 
     console.log('📝 Dados recebidos:', {
       subject: subject || 'Não especificado',
       textLength: doubtText?.length || 0,
-      hasImage: !!imageFile
+      images: images.length
     });
 
     // Validações básicas
@@ -66,12 +77,14 @@ export async function POST(request: NextRequest) {
     }
 
     // Validar tamanho da imagem se fornecida
-    if (imageFile && imageFile.size > MAX_IMAGE_SIZE) {
-      console.error('❌ Imagem muito grande');
-      return NextResponse.json(
-        { error: 'A imagem não pode exceder 10MB' },
-        { status: 400, headers: responseHeaders }
-      );
+    for (const img of images) {
+      if (img.size > MAX_IMAGE_SIZE) {
+        console.error('❌ Imagem muito grande');
+        return NextResponse.json(
+          { error: `A imagem ${img.name} não pode exceder 10MB` },
+          { status: 400, headers: responseHeaders }
+        );
+      }
     }
 
     // Preparar payload para o n8n
@@ -87,11 +100,14 @@ export async function POST(request: NextRequest) {
     }
 
     // Se tiver imagem, converter para base64
-    if (imageFile) {
-      const imageBuffer = await imageFile.arrayBuffer();
-      const base64Image = Buffer.from(imageBuffer).toString('base64');
-      const mimeType = imageFile.type;
-      payload.imageBase64 = `data:${mimeType};base64,${base64Image}`;
+    if (images.length > 0) {
+      payload.imagesBase64 = [];
+      for (const img of images) {
+        const imageBuffer = await img.arrayBuffer();
+        const base64Image = Buffer.from(imageBuffer).toString('base64');
+        const mimeType = img.type || 'image/jpeg';
+        payload.imagesBase64.push(`data:${mimeType};base64,${base64Image}`);
+      }
     }
 
     // Chamar o webhook do n8n
@@ -108,11 +124,14 @@ export async function POST(request: NextRequest) {
 
     console.log('✅ Resposta do n8n recebida com sucesso');
     
-    // Retornar a resposta do n8n
-    return NextResponse.json(n8nResponse.data, { 
-      status: 200, 
-      headers: responseHeaders 
-    });
+    // Retornar a resposta do n8n junto com os dados originais de dúvida para exibição
+    const out = {
+      ...n8nResponse.data,
+      originalDoubt: doubtText,
+      doubtImages: payload.imagesBase64 || []
+    };
+
+    return NextResponse.json(out, { status: 200, headers: responseHeaders });
   } catch (error) {
     console.error('❌ Erro no processamento:', error);
     return NextResponse.json(

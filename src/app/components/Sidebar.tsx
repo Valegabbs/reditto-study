@@ -45,7 +45,7 @@ export default function Sidebar() {
   const [showVisitorNotice, setShowVisitorNotice] = React.useState(false)
   const [requestedHref, setRequestedHref] = React.useState<string | null>(null)
 
-  const restricted = (href: string) => ['/historico', '/evolucao', '/whatsapp', '/temas'].includes(href)
+  const restricted = (href: string) => ['/historico'].includes(href)
 
   function handleNavigate(href: string) {
     if (!user && restricted(href)) {
@@ -53,11 +53,7 @@ export default function Sidebar() {
       setShowVisitorNotice(true)
       return
     }
-    if (href === '/whatsapp') {
-      // abrir em nova aba sem fechar a atual
-      window.open('https://wa.link/pln20s', '_blank', 'noopener,noreferrer')
-      return
-    }
+  // navigate normally
     router.push(href)
   }
 
@@ -116,24 +112,7 @@ export default function Sidebar() {
               label="Histórico"
               title="Histórico"
             />
-            <Button
-              href="/evolucao"
-              icon={<TrendingUp size={18} />}
-              label="Evolução"
-              title="Evolução"
-            />
-            <Button
-              href="/temas"
-              icon={<BookOpen size={18} />}
-              label="Temas"
-              title="Temas"
-            />
-            <Button
-              href="/whatsapp"
-              icon={<MessageCircle size={18} />}
-              label="Whatsapp"
-              title="Whatsapp"
-            />
+            {/* Removed Evolução, Temas and Whatsapp for Reditto Study */}
             {/* Favoritas removida */}
           </div>
         </div>
@@ -147,9 +126,6 @@ export default function Sidebar() {
             <div className="space-y-3 w-full mt-12">
               <Button href="/materias" icon={<Home size={18} />} label="Início" title="Início" />
               <Button href="/historico" icon={<History size={18} />} label="Histórico" title="Histórico" />
-              <Button href="/evolucao" icon={<TrendingUp size={18} />} label="Evolução" title="Evolução" />
-              <Button href="/temas" icon={<BookOpen size={18} />} label="Temas" title="Temas" />
-              <Button href="/whatsapp" icon={<MessageCircle size={18} />} label="Whatsapp" title="Whatsapp" />
             </div>
           </div>
         </div>
@@ -160,7 +136,7 @@ export default function Sidebar() {
           <div className="max-w-md w-full mx-4 p-6 rounded-2xl border border-blue-400/50 bg-gradient-to-br from-blue-800/95 via-blue-900/95 to-black/80 text-white shadow-[0_10px_40px_rgba(59,130,246,0.3)] backdrop-blur-md">
             <h2 className="text-xl font-semibold text-blue-200 mb-2">Recurso exclusivo para usuários logados</h2>
             <p className="text-blue-100/90 mb-4">
-              As seções Histórico, Evolução, Temas e Favoritas ficam disponíveis após login. Crie uma conta ou faça login para acessar.
+              A seção Histórico fica disponível após login. Crie uma conta ou faça login para acessar seu histórico.
             </p>
             <div className="flex gap-2 justify-end">
               <button

@@ -31,7 +31,7 @@ function DuvidaPageContent() {
   const { user, signOut, isConfigured, loading } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [selectedImages, setSelectedImages] = useState<File[]>([]);
   const [doubtText, setDoubtText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showConsent, setShowConsent] = useState(false);
@@ -48,16 +48,22 @@ function DuvidaPageContent() {
   }, [searchParams]);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      // Validar tamanho da imagem (máximo 10MB)
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+
+    const validFiles: File[] = [];
+    for (const file of files) {
       if (file.size > 10 * 1024 * 1024) {
         window.dispatchEvent(new CustomEvent('reditto:toast', { 
-          detail: { message: 'Imagem muito grande. Máximo 10MB.', type: 'error' } 
+          detail: { message: `Imagem ${file.name} muito grande. Máximo 10MB.`, type: 'error' } 
         }));
-        return;
+        continue;
       }
-      setSelectedImage(file);
+      validFiles.push(file);
+    }
+
+    if (validFiles.length > 0) {
+      setSelectedImages((prev) => [...prev, ...validFiles]);
     }
   };
 
@@ -77,8 +83,8 @@ function DuvidaPageContent() {
       return;
     }
 
-    // Validar se não enviou apenas imagem sem texto
-    if (selectedImage && doubtText.length < 30) {
+  // Validar se não enviou apenas imagem sem texto
+  if (selectedImages.length > 0 && doubtText.length < 30) {
       window.dispatchEvent(new CustomEvent('reditto:toast', { 
         detail: { message: 'É necessário preencher o campo de texto com sua dúvida (mínimo 30 caracteres).', type: 'error' } 
       }));
@@ -91,10 +97,12 @@ function DuvidaPageContent() {
       const doubtFormData = new FormData();
       doubtFormData.append('subject', selectedSubject);
       doubtFormData.append('doubtText', doubtText);
-      
-      // Se tiver imagem, anexar
-      if (selectedImage) {
-        doubtFormData.append('image', selectedImage);
+
+      // Se tiver imagens, anexar todas como 'images'
+      if (selectedImages && selectedImages.length > 0) {
+        for (const file of selectedImages) {
+          doubtFormData.append('images', file);
+        }
       }
 
       // Usando o novo endpoint para dúvidas
@@ -103,16 +111,24 @@ function DuvidaPageContent() {
         body: doubtFormData 
       });
       
-      if (!response.ok) {
+  if (!response.ok) {
         const errorData = await response.json().catch(() => ({ error: 'Estamos tendo problemas no servidor, tente mais tarde.' }));
         throw new Error(errorData.error || 'Estamos tendo problemas no servidor, tente mais tarde.');
       }
       
       const result = await response.json();
       setIsLoading(false);
-      
-      // Redirecionar para a página de resultados
-      window.location.href = `/resultados?data=${encodeURIComponent(JSON.stringify(result))}`;
+
+      // Salvar o resultado no sessionStorage (evita URL muito grande com imagens base64)
+      try {
+        sessionStorage.setItem('reditto:lastDoubtResult', JSON.stringify(result));
+      } catch (err) {
+        // se falhar, ainda tentamos mandar pelo query param (fallback)
+        console.warn('Não foi possível salvar em sessionStorage:', err);
+      }
+
+      // Redirecionar para a página de resultados (sem payload grande na URL)
+      window.location.href = '/resultados';
     } catch (error) {
       console.error('❌ Erro ao enviar dúvida:', error);
       window.dispatchEvent(new CustomEvent('reditto:toast', { 
@@ -213,7 +229,7 @@ function DuvidaPageContent() {
             <div className="flex items-center p-6">
               {/* Esconde logo e slogan no mobile (onde existe o menu hambúrguer) */}
               <div className="hidden gap-3 items-center ml-4 md:flex header-item">
-                <Image src="/assets/logo.PNG" alt="Reditto Study Logo" width={36} height={36} className="w-9 h-9" />
+                <Image src="/assets/logo.PNG?v=3" alt="Reditto Study Logo" width={36} height={36} className="w-9 h-9" />
                 <span className="text-base font-medium header-text text-white/90">Reditto Study - Sua IA de Estudos!</span>
               </div>
               <div className="flex gap-3 items-center ml-auto">
@@ -305,6 +321,7 @@ function DuvidaPageContent() {
                         <input
                           type="file"
                           accept="image/*"
+                          multiple
                           onChange={handleImageUpload}
                           className="hidden"
                           id="image-upload"
@@ -319,11 +336,13 @@ function DuvidaPageContent() {
                           </p>
                         </label>
                       </div>
-                      {selectedImage && (
+          {selectedImages.length > 0 && (
                         <div className="p-3 mt-4 rounded-2xl border backdrop-blur-sm bg-gray-700/30 border-gray-700/50">
-                          <p className="text-sm text-white">
-                            Arquivo selecionado: {selectedImage.name}
-                          </p>
+                          <div className="grid grid-cols-1 gap-2">
+            {selectedImages.map((f, idx) => (
+                              <p key={idx} className="text-sm text-white">Arquivo selecionado: {f.name}</p>
+                            ))}
+                          </div>
                         </div>
                       )}
                     </div>

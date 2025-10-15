@@ -28,7 +28,7 @@ export default function FloatingMenu({ onLogout }: { onLogout?: () => void }) {
   return (
     <div className="floating-menu" aria-label="Menu flutuante">
       <div className="flex items-center gap-2">
-        <Image src="/assets/logo.PNG" alt="Reditto Logo" width={28} height={28} />
+            <Image src="/assets/logo.PNG?v=3" alt="Reditto Logo" width={28} height={28} />
         <span className="font-semibold">Correção de Redação para Todos!</span>
       </div>
       <button 
