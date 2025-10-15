@@ -94,7 +94,7 @@ export default function HistoricoPage() {
             <div className="max-w-5xl px-6 py-8 mx-auto">
               <div className="flex items-center p-6 mb-4">
                 <div className="hidden md:flex items-center gap-2 header-item bg-gray-800/20 border border-gray-700/50 rounded-full px-4 py-2 backdrop-blur-sm">
-                  <Image src="/assets/logo.PNG?v=3" alt="Reditto Logo" width={20} height={20} className="w-5 h-5" />
+                  <Image src="/assets/study.png" alt="Reditto Logo" width={20} height={20} className="w-5 h-5" />
                   <span className="header-text text-white/90 text-sm font-medium">Reditto Study - Sua IA de Estudos!</span>
                 </div>
                 <div className="ml-auto flex items-center gap-3">

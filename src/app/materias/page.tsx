@@ -246,7 +246,7 @@ export default function MateriasPage() {
             <div className="flex items-center p-6">
               {/* Esconde logo e slogan no mobile (onde existe o menu hambúrguer) */}
               <div className="hidden gap-3 items-center ml-4 md:flex header-item">
-                <Image src="/assets/logo.PNG?v=3" alt="Reditto Study Logo" width={36} height={36} className="w-9 h-9" />
+                <Image src="/assets/study.png" alt="Reditto Study Logo" width={36} height={36} className="w-9 h-9" />
                 <span className="text-base font-medium header-text text-white/90">Reditto Study - Sua IA de Estudos!</span>
               </div>
               <div className="flex gap-3 items-center ml-auto">

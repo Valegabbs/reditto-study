@@ -10,9 +10,12 @@ export const metadata: Metadata = {
   title: "Reditto Study",
   description: "Plataforma de estudo com IA para tirar dúvidas",
   icons: {
-    icon: '/assets/logo.PNG?v=3',
-    apple: '/assets/logo.PNG?v=3',
-    shortcut: '/assets/logo.PNG?v=3',
+    icon: [
+      { url: '/favicon.ico', type: 'image/x-icon' },
+      { url: '/assets/study.png', type: 'image/png' }
+    ],
+    apple: '/assets/study.png',
+    shortcut: '/assets/study.png',
   },
 };
 
